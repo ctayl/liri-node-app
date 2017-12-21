@@ -1,29 +1,84 @@
+// import { clearInterval } from "timers";
+
 // import { setTimeout } from "timers";
 
 
 // call modules
-var twitter = require("./keys.js");
+var keys = require("./keys.js");
 var Twitter = require('twitter');
 var Spotify = require("node-spotify-api");
 var fs = require("fs");
+var request = require("request");
 
 
 
 setTimeout(function () {
 
-    if (liri.mod === "twitter") {
+    switch (liri.mod) {
 
-        if (liri.act === "post") {
-            liri.twitter.post(liri.input)
-        } else if (liri.act === "get") {
-            liri.twitter.get(liri.input);
-        } else if (liri.act === "retweet") {
-            liri.twitter.retweet(liri.input)
-        }
-    } else if (liri.mod === "spotify") {
-        if (liri.act === "search") {
-            liri.spotify.search(liri.input)
-        }
+        case "twitter":
+
+            switch (liri.act) {
+
+                case "post":
+
+                    liri.twitter.post(liri.input);
+                    break;
+
+                case "get":
+
+                    liri.twitter.get(liri.input);
+                    break;
+
+                case "retweet":
+
+                    console.log("test a");
+
+                    if (liri.mode === "cont") {
+
+                        console.log("test 0");
+
+                        var retweet = function () {
+
+                            console.log("test 1");
+
+                            liri.twitter.retweet(liri.input);
+
+
+                        }
+
+                        var auto = setInterval(function () { console.log("test 2"); retweet() }, 10000);
+
+                        setTimeout(function () { clearInterval(auto); console.log("timed out") }, 600000);
+                        break;
+                    }
+                    break;
+
+                case "stop":
+
+                    clearInterval(retweet);
+                    break;
+
+                default:
+
+                    liri.twitter.retweet(liri.input)
+                    break;
+            }
+            break;
+
+        case "spotify":
+
+            switch (liri.act) {
+
+                case "search":
+
+                    liri.spotify.search(liri.input);
+                    break;
+            };
+            break;
+        case "movie-this":
+            liri.movie.get(process.argv[3]);
+            break;
     }
 
 }, 1);
@@ -35,6 +90,7 @@ var liri = {
     mod: process.argv[2],
     act: process.argv[3],
     input: process.argv[4],
+    mode: process.argv[5],
 
     // twitter module
     twitter: {
@@ -43,10 +99,10 @@ var liri = {
 
         // create client object
         client: new Twitter({
-            consumer_key: twitter.twitterKeys.consumer_key,
-            consumer_secret: twitter.twitterKeys.consumer_secret,
-            access_token_key: twitter.twitterKeys.access_token_key,
-            access_token_secret: twitter.twitterKeys.access_token_secret,
+            consumer_key: keys.twitterKeys.consumer_key,
+            consumer_secret: keys.twitterKeys.consumer_secret,
+            access_token_key: keys.twitterKeys.access_token_key,
+            access_token_secret: keys.twitterKeys.access_token_secret,
         }),
 
         // posts to twitter
@@ -126,8 +182,8 @@ var liri = {
 
         // spotify object
         client: new Spotify({
-            id: "b38f6fd97cc148c99b34e535e92ff2c3",
-            secret: "da417e956f93441991a4f10e3aecca8f"
+            id: keys.spotifyKeys.id,
+            secret: keys.spotifyKeys.secret
         }),
 
         search: function (search) {
@@ -140,9 +196,28 @@ var liri = {
                     return console.log('Error occurred: ' + err);
                 }
 
-                console.log(data);
+                console.log("Artist: " + data.tracks.items[0].artists[0].name);
+                console.log("Song name: " + data.tracks.items[0].name);
+                console.log("Album name: " + data.tracks.items[0].album.name);
+                console.log("Link: " + data.tracks.items[0].external_urls.spotify);
+
             })
         }
+    },
+
+    // movie module
+    movie: {
+
+        get: function (search) {
+            request('http://www.omdbapi.com/?apikey=trilogy&t=' + search, function(err, res, body){
+                if (err) {
+                    console.log(err);
+                }
+
+                console.log(body);
+            })
+        }
+
     }
 }
 
