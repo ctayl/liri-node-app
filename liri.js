@@ -14,72 +14,7 @@ var request = require("request");
 
 setTimeout(function () {
 
-    switch (liri.mod) {
-
-        case "twitter":
-
-            switch (liri.act) {
-
-                case "post":
-
-                    liri.twitter.post(liri.input);
-                    break;
-
-                case "get":
-
-                    liri.twitter.get(liri.input);
-                    break;
-
-                case "retweet":
-
-                    console.log("test a");
-
-                    if (liri.mode === "cont") {
-
-                        console.log("test 0");
-
-                        var retweet = function () {
-
-                            console.log("test 1");
-
-                            liri.twitter.retweet(liri.input);
-
-
-                        }
-
-                        var auto = setInterval(function () { console.log("test 2"); retweet() }, 10000);
-
-                        setTimeout(function () { clearInterval(auto); console.log("timed out") }, 600000);
-                        break;
-                    }
-                    break;
-
-                case "stop":
-
-                    clearInterval(retweet);
-                    break;
-
-                default:
-
-                    liri.twitter.retweet(liri.input)
-                    break;
-            }
-            break;
-
-        case "spotify":
-
-            switch (liri.act) {
-
-                case "search":
-
-                    liri.spotify.search(liri.input);
-                    break;
-            };
-            break;
-        case "movie-this":
-            liri.movie.get(process.argv[3]);
-            break;
-    }
+    liri.eval();
 
 }, 1);
 
@@ -91,6 +26,98 @@ var liri = {
     act: process.argv[3],
     input: process.argv[4],
     mode: process.argv[5],
+
+    eval: function (arg0, arg1) {
+
+
+        if (arg0) {
+            liri.mod = arg0;
+        }
+
+        if (arg1) {
+            liri.input = arg1;
+        }
+
+
+
+
+        switch (liri.mod) {
+
+            case "twitter":
+
+                switch (liri.act) {
+
+                    case "post":
+
+                        liri.twitter.post(liri.input);
+                        break;
+
+                    case "get":
+                        console.log(liri.input);
+                        liri.twitter.get(liri.input);
+                        break;
+
+                    case "retweet":
+
+                        console.log("test a");
+
+                        if (liri.mode === "cont") {
+
+                            console.log("test 0");
+
+                            var retweet = function () {
+
+                                console.log("test 1");
+
+                                liri.twitter.retweet(liri.input);
+
+
+                            }
+
+                            var auto = setInterval(function () { console.log("test 2"); retweet() }, 10000);
+
+                            setTimeout(function () { clearInterval(auto); console.log("timed out") }, 600000);
+                            break;
+                        } else {
+                            liri.twitter.retweet(liri.input);
+                        }
+                        break;
+
+                    case "stop":
+
+                        clearInterval(retweet);
+                        break;
+
+                    default:
+
+                        liri.twitter.retweet(liri.input)
+                        break;
+                };
+                break;
+
+            case "spotify-this":
+
+                if (arg1) {
+                    console.log("test");
+                    liri.spotify.search(arg1);
+                } else {
+                    liri.spotify.search(process.argv[3]);
+                }
+                break;
+
+            case "movie-this":
+
+                if (arg1) {
+                    liri.movie.get(arg1);
+                }
+                liri.movie.get(process.argv[3]);
+                break;
+            case "do-what-it-says":
+
+                liri.exe.do();
+                break;
+        }
+    },
 
     // twitter module
     twitter: {
@@ -138,7 +165,7 @@ var liri = {
 
                 liri.twitter.client.get('search/tweets', { q: 'notthebotuwant' }, function (error, tweets, response) {
 
-                    console.log("TWEET HISTORY (NEWEST TO OLDEST)");
+                    console.log("MY TWEET HISTORY (NEWEST TO OLDEST)");
 
                     for (let i = 0; i < tweets.statuses.length; i++) {
 
@@ -209,15 +236,54 @@ var liri = {
     movie: {
 
         get: function (search) {
-            request('http://www.omdbapi.com/?apikey=trilogy&t=' + search, function(err, res, body){
+
+            request('http://www.omdbapi.com/?apikey=trilogy&t=' + search, function (err, res, body) {
+
                 if (err) {
                     console.log(err);
                 }
 
-                console.log(body);
+                var response = JSON.parse(body);
+
+                console.log("-----------------------------------------");
+                console.log("Title: " + response.Title);
+                console.log("Released: " + response.Year);
+                console.log("IMDB Rating: " + response.imdbRating);
+                console.log("Rotten Tomatos Rating: " + response.Ratings[1].Value);
+                console.log("Produced in: " + response.Country);
+                console.log("Language: " + response.Language);
+                console.log("Plot: " + response.Plot);
+                console.log("Actors: " + response.Actors);
+                console.log("-----------------------------------------");
             })
         }
 
+    },
+
+    exe: {
+
+        do: function () {
+
+            fs.readFile("random.json", "utf8", function (err, data) {
+                if (err) {
+                    console.log(err);
+                }
+
+                var res = JSON.parse(data);
+                // var res = data.split(",");
+                for (let i = 0; i < res.actions.length; i++) {
+
+                    var action = res.actions[i].action;
+                    console.log(action);
+
+                    var input = res.actions[i].input;
+                    console.log(input);
+                    liri.eval(action, input);
+                }
+
+            })
+
+        }
     }
 }
 

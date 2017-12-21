@@ -1,4 +1,4 @@
-console.log('Twitter Keys Module Loaded');
+console.log('Keys Module Loaded');
 
 // @notthebotuwant
 var twitterKeys = {
