@@ -1,0 +1,12 @@
+{
+    "actions": [
+        {
+            "action": "spotify-this",
+            "input": "I Want it That Way"
+        },
+        {
+            "action": "twitter",
+            "input": "get"
+        }
+    ]
+}
