@@ -38,56 +38,54 @@ var liri = {
             liri.input = arg1;
         }
 
-
-
-
         switch (liri.mod) {
 
             case "twitter":
 
                 switch (liri.act) {
 
+                    // node liri.js twitter post
                     case "post":
 
                         liri.twitter.post(liri.input);
                         break;
 
+                    // node liri.js twitter get
                     case "get":
-                        console.log(liri.input);
+
                         liri.twitter.get(liri.input);
                         break;
-
+                    // node liri.js twitter retweet
                     case "retweet":
-
-                        console.log("test a");
 
                         if (liri.mode === "cont") {
 
-                            console.log("test 0");
-
                             var retweet = function () {
-
-                                console.log("test 1");
-
                                 liri.twitter.retweet(liri.input);
-
-
                             }
 
                             var auto = setInterval(function () { console.log("test 2"); retweet() }, 10000);
 
                             setTimeout(function () { clearInterval(auto); console.log("timed out") }, 600000);
                             break;
+
                         } else {
+
                             liri.twitter.retweet(liri.input);
                         }
                         break;
+                    // node liri.js twitter stream
+                    case "stream":
 
-                    case "stop":
+                        if (liri.input) {
 
-                        clearInterval(retweet);
+                            liri.twitter.stream(liri.input);
+                        } else {
+
+                            liri.twitter.stream();
+                        }
                         break;
-
+                    
                     default:
 
                         liri.twitter.retweet(liri.input)
@@ -116,13 +114,12 @@ var liri = {
 
                 liri.exe.do();
                 break;
+
         }
     },
 
     // twitter module
     twitter: {
-
-
 
         // create client object
         client: new Twitter({
@@ -131,6 +128,22 @@ var liri = {
             access_token_key: keys.twitterKeys.access_token_key,
             access_token_secret: keys.twitterKeys.access_token_secret,
         }),
+
+        stream: function (search) {
+
+            // You can also get the stream in a callback if you prefer. 
+            liri.twitter.client.stream('statuses/filter', { track: search }, function (stream) {
+                stream.on('data', function (event) {
+                    console.log(event && event.text);
+                    liri.twitter.retweet(search);
+                    return;
+                });
+
+                stream.on('error', function (error) {
+                    throw error;
+                });
+            });
+        },
 
         // posts to twitter
         post: function (status) {
@@ -180,9 +193,9 @@ var liri = {
 
             liri.twitter.client.get('search/tweets', { q: search }, function (error, tweets, response) {
 
-                console.log(tweets);
+                // console.log(tweets);
 
-                for (let i = 0; i < tweets.statuses.length; i++) {
+                for (let i = 0; i < 1; i++) {
 
                     console.log("TWEET " + i + ": " + tweets.statuses[i].text);
                     console.log("TWEET ID " + i + ": " + tweets.statuses[i].id);
@@ -290,23 +303,10 @@ var liri = {
 console.log("liri initiated");
 
 
-// switch (cmd) {
-
-//     case "my-tweets":
-
-//         break;
-
-//     case "spotify-this-song":
-
-//         break;
 
 
-//     case "movie-this":
+foo();
 
-//         break;
-
-//     case "do-what-it-says":
-
-//         break;
-
-// }
+function foo() {
+    console.log("fancy");
+};
