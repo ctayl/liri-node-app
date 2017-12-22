@@ -9,6 +9,7 @@ var Twitter = require('twitter');
 var Spotify = require("node-spotify-api");
 var fs = require("fs");
 var request = require("request");
+var moment = require('moment');
 
 
 
@@ -93,7 +94,7 @@ var liri = {
                 };
                 break;
 
-            case "spotify-this":
+            case "spotify-this-song":
 
                 if (arg1) {
                     console.log("test");
@@ -297,16 +298,22 @@ var liri = {
             })
 
         }
+    },
+
+    test: function() {
+        var repeat = setInterval(function(){
+        console.log(moment().format("h hh"));
+
+            // liri.twitter.post((moment()));
+            setTimeout(function(){clearInterval(repeat)}, 2000);
+        }, 1000);
     }
-}
+};
+liri.test();
+
+
 
 console.log("liri initiated");
 
 
 
-
-foo();
-
-function foo() {
-    console.log("fancy");
-};
