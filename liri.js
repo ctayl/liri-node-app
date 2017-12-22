@@ -56,6 +56,16 @@ var liri = {
 
                         liri.twitter.get(liri.input);
                         break;
+
+                    // node liri.js twitter get
+                    case "fav":
+                        if (process.argv[5]) {
+                            var timed = setInterval(function () { liri.twitter.fav(liri.input) }, 1000 * 5);
+                            setTimeout(function () { clearInterval(timed) }, 1000 * process.argv[5]);
+                        } else {
+                            liri.twitter.fav(liri.input);
+                        }
+                        break;
                     // node liri.js twitter retweet
                     case "retweet":
 
@@ -86,7 +96,7 @@ var liri = {
                             liri.twitter.stream();
                         }
                         break;
-                    
+
                     default:
 
                         liri.twitter.retweet(liri.input)
@@ -122,6 +132,8 @@ var liri = {
     // twitter module
     twitter: {
 
+        screenName: "notthebotuwant",
+
         // create client object
         client: new Twitter({
             consumer_key: keys.twitterKeys.consumer_key,
@@ -135,8 +147,17 @@ var liri = {
             // You can also get the stream in a callback if you prefer. 
             liri.twitter.client.stream('statuses/filter', { track: search }, function (stream) {
                 stream.on('data', function (event) {
-                    console.log(event && event.text);
-                    liri.twitter.retweet(search);
+                    console.log(event.id);
+                    var id = event.id_str;
+                    // liri.twitter.fav(id);
+                    liri.twitter.client.post("favorites/create", { id: id }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        } else {
+                            console.log("tweet: " + id + " favorited")
+                        }
+                    })
                     return;
                 });
 
@@ -215,6 +236,53 @@ var liri = {
                     });
                 }
             });
+        },
+
+        add: function (user) {
+
+            liri.twitter.client.post("friendships/create", { screen_name: user }, function (err, response) {
+                if (err) {
+                    console.log(err)
+                }
+
+                console.log(user + " is now followed!");
+            })
+
+        },
+
+        followListen: function () {
+            var stream = liri.twitter.client.stream('user');
+            stream.on('follow', followed);
+            function followed(event) {
+                var name = event.source.screen_name;
+                if (name != liri.twitter.screenName) {
+                    console.log(name + " followed!");
+                    liri.twitter.post("@" + name + " Thanks for following!");
+                    liri.twitter.add(name);
+                } else {
+                    console.log("done");
+                    return
+                }
+            }
+
+        },
+
+        fav: function (search) {
+            liri.twitter.client.get("search/tweets", { q: search }, function (error, tweets, response) {
+                var tweetext = (tweets.statuses[0].text);
+                var id = (tweets.statuses[0].id_str);
+                if (search) {
+                    liri.twitter.client.post("favorites/create", { id: id }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        } else {
+                            console.log("tweet: " + tweetext + " favorited")
+                        }
+                    })
+
+                }
+            })
         }
     },
 
@@ -300,19 +368,11 @@ var liri = {
         }
     },
 
-    test: function() {
-        var repeat = setInterval(function(){
-        console.log(moment().format("h hh"));
 
-            // liri.twitter.post((moment()));
-            setTimeout(function(){clearInterval(repeat)}, 2000);
-        }, 1000);
-    }
+
 };
 
-liri.test();
-
-
+liri.twitter.followListen();
 
 console.log("liri initiated");
 
