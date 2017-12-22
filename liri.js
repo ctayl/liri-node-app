@@ -144,7 +144,7 @@ var liri = {
 
         stream: function (search) {
 
-            // You can also get the stream in a callback if you prefer. 
+            // c: pls limit requests
             liri.twitter.client.stream('statuses/filter', { track: search }, function (stream) {
                 stream.on('data', function (event) {
                     console.log(event.id);
@@ -186,7 +186,7 @@ var liri = {
 
             if (search) {
 
-                liri.twitter.client.get('search/tweets', { q: search }, function (error, tweets, response) {
+                liri.twitter.client.get('search/tweets', { q: search, count: 1 }, function (error, tweets, response) {
 
                     console.log("TWEET HISTORY (NEWEST TO OLDEST)");
 
@@ -199,6 +199,10 @@ var liri = {
             } else {
 
                 liri.twitter.client.get('search/tweets', { q: 'notthebotuwant' }, function (error, tweets, response) {
+                    if (error) {
+                        console.log(error);
+                        return
+                    }
 
                     console.log("MY TWEET HISTORY (NEWEST TO OLDEST)");
 
@@ -268,7 +272,7 @@ var liri = {
         },
 
         fav: function (search) {
-            liri.twitter.client.get("search/tweets", { q: search }, function (error, tweets, response) {
+            liri.twitter.client.get("search/tweets", { q: search, count: 1}, function (error, tweets, response) {
                 var tweetext = (tweets.statuses[0].text);
                 var id = (tweets.statuses[0].id_str);
                 if (search) {
@@ -372,7 +376,7 @@ var liri = {
 
 };
 
-liri.twitter.followListen();
+// liri.twitter.followListen();
 
 console.log("liri initiated");
 
