@@ -147,18 +147,18 @@ var liri = {
             // c: pls limit requests
             liri.twitter.client.stream('statuses/filter', { track: search }, function (stream) {
                 stream.on('data', function (event) {
-                    console.log(event.id);
-                    var id = event.id_str;
-                    // liri.twitter.fav(id);
-                    liri.twitter.client.post("favorites/create", { id: id }, function (err) {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        } else {
-                            console.log("tweet: " + id + " favorited")
-                        }
-                    })
-                    return;
+                    console.log(event);
+                    // var id = event.id_str;
+                    // // liri.twitter.fav(id);
+                    // liri.twitter.client.post("favorites/create", { id: id }, function (err) {
+                    //     if (err) {
+                    //         console.log(err);
+                    //         return;
+                    //     } else {
+                    //         console.log("tweet: " + id + " favorited")
+                    //     }
+                    // })
+                    // return;
                 });
 
                 stream.on('error', function (error) {
