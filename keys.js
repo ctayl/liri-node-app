@@ -11,8 +11,8 @@ console.log('Keys Module Loaded');
 var twitterKeys = {
   consumer_key: 'MV5Zc3GZUXg0joYaYrwNXgKYF',
   consumer_secret: 'Rc5bxwFjufhY53X7i9GVXJiiMfxRSuDxbEDVYcLr85UKZW7oRN',
-  access_token_key: '943715429070942208-SIsZaR44D698gu9rhH9JBYhCxCZRzJg',
-  access_token_secret: 'GQRfuZwSc3HbOzpTiuQcWhRGBoDT5qx3E2KGPl5njUTa2',
+  access_token_key: '943715429070942208-EptyvcMJEle3vGoTACUwCCfjHhaiC5C',
+  access_token_secret: '0wr3LGbRalzhdOZdXPw6YCuCy3828242mx8aXSWxEoxIm',
 }
 
 var spotifyKeys = {

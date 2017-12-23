@@ -1,3 +1,4 @@
+
 // import { setTimeout } from "timers";
 
 
@@ -145,8 +146,44 @@ var liri = {
 
             // c: pls limit requests
             liri.twitter.client.stream('statuses/filter', { track: search }, function (stream) {
-                stream.on('data', function (event) {
-                    console.log(event);
+                stream.on('data', function (error, tweets) {
+                    // console.log(event);
+                    if (error) {
+                        console.log(error);
+                        return
+                    } else {
+                        // console.log(tweets);
+
+
+
+                        console.log("TWEET: " + tweets.statuses[0].text);
+                        console.log("TWEET ID: " + tweets.statuses[0].id);
+
+
+
+                        var tweetId = tweets.statuses[0].id_str;
+
+                        liri.twitter.client.post("statuses/retweet/" + tweetId, function (error, tweet, response) {
+                            if (!error) {
+                                liri.twitter.add(tweet.retweeted_status.user.screen_name);
+                                console.log("_Tweeted: " + tweet.id_str);
+                                liri.twitter.client.post("favorites/create", { id: tweet.retweeted_status.id_str }, function (err) {
+                                    if (!error) {
+                                        console.log("___Faved: " + tweet.id_str);
+
+                                    } else {
+                                        console.log(error)
+                                    }
+                                });
+
+                            } else {
+                                console.log("test");
+                                // test();
+                                console.log(error)
+                            }
+                        });
+                    }
+
                     // liri.twitter.add(event)
                     // var id = event.id_str;
                     // // liri.twitter.fav(id);
@@ -159,7 +196,8 @@ var liri = {
                     //     }
                     // })
                     // return;
-                });
+                })
+
 
                 stream.on('error', function (error) {
                     throw error;
@@ -222,36 +260,48 @@ var liri = {
                     if (error) {
                         console.log(error);
                         return
-                    } else {
+                    } else if (!error) {
                         // console.log(tweets);
+                        if (!tweets.statuses[0]) {
+                            console.log(" ");
+                            console.log("-------------");
+                            console.log("no tweet err");
+                            console.log("-------------");
+                            console.log(" ");
+                            return
+                        } else {
+
+
+                            console.log("TWEET: " + tweets.statuses[0].text);
+                            console.log("TWEET ID: " + tweets.statuses[0].id);
 
 
 
-                        console.log("TWEET: " + tweets.statuses[0].text);
-                        console.log("TWEET ID: " + tweets.statuses[0].id);
+                            var tweetId = tweets.statuses[0].id_str;
 
+                            liri.twitter.client.post("statuses/retweet/" + tweetId, function (error, tweet, response) {
+                                if (!error) {
+                                    liri.twitter.add(tweet.retweeted_status.user.screen_name);
+                                    console.log("_Tweeted: " + tweet.id_str);
+                                    liri.twitter.client.post("favorites/create", { id: tweet.retweeted_status.id_str }, function (err) {
+                                        if (!error) {
+                                            console.log("___Faved: " + tweet.id_str);
 
+                                        } else {
+                                            console.log(error)
+                                        }
+                                    });
 
-                        var tweetId = tweets.statuses[0].id_str;
+                                } else {
+                                    console.log("test");
 
-                        liri.twitter.client.post("statuses/retweet/" + tweetId, function (error, tweet, response) {
-                            if (!error) {
-                                liri.twitter.add(tweet.retweeted_status.user.screen_name);
-                                console.log("_Tweeted: " + tweet.id_str);
-                                liri.twitter.client.post("favorites/create", { id: tweet.retweeted_status.id_str }, function (err) {
-                                    if (!error) {
-                                        console.log("___Faved: " + tweet.id_str);
-
-                                    } else {
-                                        console.log(error)
-                                    }
-                                });
-
-                            } else {
-                                console.log("test");
-                                console.log(error)
-                            }
-                        });
+                                    console.log(error)
+                                }
+                            });
+                        }
+                    } else {
+                        console.log("????");
+                        return
                     }
                 });
             }, 1000 * 30);
@@ -315,12 +365,21 @@ var liri = {
                 var reTweets = tweets.statuses[0].retweet_count;
                 var tweetId = tweets.statuses[0].id_str;
                 var tweetext = (tweets.statuses[0].text);
+                console.log(tweetext);
                 var id = (tweets.statuses[0].id_str);
                 if (reTweets > 5 || favCount > 30) {
                     console.log("TWEET ID: " + tweetId);
 
 
+                    liri.twitter.client.post("favorites/create", { id: id }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        } else {
 
+                            console.log("tweet: " + tweetext + " favorited")
+                        }
+                    });
 
 
                     liri.twitter.client.post("statuses/retweet/" + tweetId, function (error, tweet, response) {
@@ -331,8 +390,7 @@ var liri = {
                             console.log(error)
                         }
                     });
-                };
-                if (search) {
+                } else if (search) {
                     liri.twitter.client.post("favorites/create", { id: id }, function (err) {
                         if (err) {
                             console.log(err);
@@ -434,7 +492,50 @@ var liri = {
 
 };
 
-// liri.twitter.addSuggested();
+// setInterval(function () { liri.twitter.fav("swiftonsecurity") }, (1000 * 60) * 60);
+// setInterval(function () { liri.twitter.fav("javascript") }, (1000 * 60) * 30);
+setInterval(function () { liri.twitter.fav("cat"); console.log ("cat search" )}, (1000 * 60) * 1);
+// setInterval(function () {
+//     liri.twitter.client.get("search/tweets", { q: "kitten", count: 1, result_type: "popular" }, function (error, tweets, response) {
+//         if (error) {
+//             console.log(error)
+//         }
+//         var favCount = tweets.statuses[0].favorite_count;
+//         var reTweets = tweets.statuses[0].retweet_count;
+//         var tweetId = tweets.statuses[0].id_str;
+//         var tweetext = (tweets.statuses[0].text);
+//         var id = (tweets.statuses[0].id_str);
+//         if (reTweets > 5 || favCount > 30) {
+//             console.log("TWEET ID: " + tweetId);
+
+
+
+
+
+//             liri.twitter.client.post("statuses/retweet/" + tweetId, function (error, tweet, response) {
+//                 if (!error) {
+//                     console.log("Tweeted: " + tweet.text);
+
+//                 } else {
+//                     console.log(error)
+//                 }
+//             });
+//         };
+//         if (search) {
+//             liri.twitter.client.post("favorites/create", { id: id }, function (err) {
+//                 if (err) {
+//                     console.log(err);
+//                     return;
+//                 } else {
+
+//                     console.log("tweet: " + tweetext + " favorited")
+//                 }
+//             })
+
+//         }
+//     })
+// }, (1000 * 60) * 50);
+// // liri.twitter.addSuggested();
 liri.twitter.followListen();
 
 console.log("liri initiated");
