@@ -256,12 +256,13 @@ var liri = {
         retweet: function (search) {
 
             setInterval(function test() {
-                liri.twitter.client.get('search/tweets', { q: search, count: 1, result_type: "recent" }, function (error, tweets, response) {
+                var tweetId = "";
+                liri.twitter.client.get('search/tweets', { q: search, count: 1, result_type: "mixed", lang: "en" }, function (error, tweets, response) {
                     if (error) {
                         console.log(error);
                         return
                     } else if (!error) {
-                        
+
                         if (!tweets.statuses[0]) {
                             console.log(" ");
                             console.log("-------------");
@@ -274,8 +275,18 @@ var liri = {
                             // console.log(tweets.statuses[0].entities);
 
                             if (!tweets.statuses[0].entities.media) {
-                                console.log("no img");
-                                return
+                                if (!tweets.statuses[0].retweeted_status) {
+                                    console.log("failed");
+                                    console.log("no img");
+                                    return
+                                } else {
+
+                                    console.log("retweet");
+                                    tweetId = tweets.statuses[0].retweeted_status.id_str;
+                                }
+                            } else {
+
+                                tweetId = tweets.statuses[0].id_str;
                             }
 
                             console.log("TWEET: " + tweets.statuses[0].text);
@@ -283,7 +294,7 @@ var liri = {
 
 
 
-                            var tweetId = tweets.statuses[0].id_str;
+
 
                             liri.twitter.client.post("statuses/retweet/" + tweetId, function (error, tweet, response) {
                                 if (!error) {
@@ -310,7 +321,7 @@ var liri = {
                         return
                     }
                 });
-            }, 1000 * 30);
+            }, 1000 * 60 );
         },
 
         add: function (user) {
